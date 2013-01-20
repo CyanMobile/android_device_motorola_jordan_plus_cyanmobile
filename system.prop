@@ -1,5 +1,5 @@
 #
-# system.prop for jordan
+# system.prop for jordan_plus
 #
 
 rild.libpath=/system/lib/libril-moto-umts-1.so
@@ -70,3 +70,17 @@ persist.sys.camera-mute=0
 # Scrolling cache 0:enable, 1:default enable, 2:default disable, 3:disable
 persist.sys.scrollingcache=2
 
+# hardware info
+ro.device.gpu=PowerVR SGX 530
+
+# CyanMobileX specific
+debug.composition.type=gpu
+persist.sys.composition.type=gpu
+persist.sys.ui.hw=true
+dalvik.vm.lockprof.threshold=500
+dalvik.vm.dexopt-flags=m=y
+dalvik.vm.execution-mode=int:jit
+dalvik.vm.dexopt-data-only=1
+ro.config.hw_menu_unlockscreen=false
+ro.service.swiqi.supported=true
+debug.sf.hw=1
