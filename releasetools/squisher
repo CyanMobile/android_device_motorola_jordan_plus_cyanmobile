@@ -1,13 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Squish a CM otapackage for distribution
 # cyanogen / CyanogenDefy
 #
 
-echo "JORDAN+ SQUISHER:"
-echo "================"
+. $ANDROID_BUILD_TOP/vendor/cyanogen/tools/functions
 
-DEVICE_OUT=$ANDROID_BUILD_TOP/out/target/product/jordan_plus
+echo -e $CL_CYN"JORDAN+ SQUISHER:"$CL_RST
+echo -e $CL_CYN"================"$CL_RST
+
+DEVICE_OUT=$OUT
 DEVICE_TOP=$ANDROID_BUILD_TOP/device/motorola/jordan_plus
 DEVICE_COMMON=$ANDROID_BUILD_TOP/device/motorola/jordan-common
 VENDOR_TOP=$ANDROID_BUILD_TOP/vendor/motorola/jordan_plus
@@ -27,7 +29,7 @@ else
 fi
 
 if [ -z "$OUT" -o ! -d "$OUT" ]; then
-	echo "ERROR: $0 only works with a full build environment. $OUT should exist."
+	echo -e $CL_RED"ERROR: $0 only works with a full build environment. $OUT should exist."$CL_RST
 	exit 1
 fi
 
@@ -39,14 +41,13 @@ else
     OTAPACKAGE=$OUT/$TARGET_PRODUCT-ota-$TARGET_BUILD_VARIANT.$USER.zip
 fi
 if [ ! -f "$OTAPACKAGE" ]; then
-	echo "$OTAPACKAGE doesn't exist!"
+	echo -e $CL_RED"$OTAPACKAGE doesn't exist!"$CL_RST
 	exit 1
 fi
 
 OPTICHARGER=$ANDROID_BUILD_TOP/vendor/cyanogen/tools/opticharger
 QUIET=-q
 DELETE_BINS="applypatch applypatch_static check_prereq recovery updater"
-
 
 # Some products want a squashfs for xbin for space
 case "$TARGET_PRODUCT" in
@@ -83,7 +84,6 @@ rm -rf $REPACK
 mkdir -p $REPACK
 echo
 
-
 # Unpack the otapackage and opticharge all apks
 mkdir $REPACK/ota
 (
@@ -100,7 +100,6 @@ else
 	echo "skipping apk optimization"
 fi
 )
-
 
 if [ "$WANT_SQUASHFS" -eq 1 ]; then
 	squash_opts="-force-uid 1000 -force-gid 1000 -no-progress -noappend -no-exports -no-recovery"
@@ -129,7 +128,6 @@ if [ "$WANT_SQUASHFS" -eq 1 ]; then
 	# Remove xbin stuff and fix up updater-script
 	$SED -i -e's,system/xbin/su,system/bin/su,g' -e'/xbin/d' $updater
 fi
-
 
 # Fix build.prop
 $SED -i \
@@ -178,14 +176,15 @@ rm -rf $REPACK/ota/recovery
 	find $REPACK/ota/system/lib/modules -name "*.ko" -not -name "overclock*" -print0 | xargs -0 arm-eabi-strip --strip-unneeded
 
 # Determine what to name the new signed package
-MODVERSION=`sed -n -e'/ro\.modversion/s/^.*CyanogenMod-//p' $REPACK/ota/system/build.prop`
+MODVERSION=`sed -n -e'/ro\.cm\.version/s/^.*CyanMobile-//p' $REPACK/ota/system/build.prop`
 : ${MODVERSION:=nightly}
-OUTFILE=$OUT/cm-$MODVERSION-signed.zip
+OUTFILE=$OUT/update-CyanMobile-$MODVERSION.zip
 
 if [ -n "$CM_NIGHTLY_BOOT" ]; then
 	MODVERSION=`echo $MODVERSION | sed -r 's/NIGHTLY/BOOT'$CM_NIGHTLY_BOOT'/'`
 	OUTFILE=$OUT/CM$MODVERSION.zip
 fi
+echo -e $CL_CYN"MODVERSION: $MODVERSION"$CL_RST
 
 # Pack it up and sign
 printf "Zipping package..."
@@ -194,7 +193,7 @@ echo
 printf "Signing package..."
 SECURITYDIR=$ANDROID_BUILD_TOP/build/target/product/security
 java -Xmx768m \
-	-jar $ANDROID_BUILD_TOP/out/host/$OUT_TARGET_HOST/framework/signapk.jar \
+	-jar $ANDROID_HOST_OUT/framework/signapk.jar \
 	-w $SECURITYDIR/testkey.x509.pem $SECURITYDIR/testkey.pk8 \
 	$REPACK/update.zip $OUTFILE
 echo
@@ -210,7 +209,7 @@ img=`basename $OUTFILE`
 cd `dirname $OUTFILE`
 $MD5 $img >$img.md5sum
 echo
-echo "Package complete: $OUTFILE"
+echo -e $CL_GRN"Package complete: $OUTFILE"$CL_RST
 cat $img.md5sum
 echo
 # Build date and current time:
