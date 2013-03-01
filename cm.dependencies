@@ -6,5 +6,13 @@
     {
       "repository": "android_device_motorola_jordan-common_cyanmobile",
       "target_path": "device/motorola/jordan-common"
+    },
+    {
+      "repository": "android_packages_apps_MotoFM_cyanmobile",
+      "target_path": "packages/apps/MotoFM"
+    },
+    {
+      "repository": "android_packages_apps_MotoFMService_cyanmobile",
+      "target_path": "packages/apps/MotoFMService"
     }
 ]
